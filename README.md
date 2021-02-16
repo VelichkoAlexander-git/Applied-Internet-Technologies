@@ -628,13 +628,118 @@ c := make(chan int, 20)
 
 ### 1.  Зачем мы используем пакеты?
 
+> Использование пакетов обусловлено тремя причинами:  
+1. Снижение вероятности дублирование имён функций, что позволяет именам быть простыми и краткими  
+2. Организация кода для упрощения поиска повторно используемых конструкций  
+3. Ускорение компиляции, так как мы должны перекомпилировать только части программы. Несмотря на то, что мы используем пакет *fmt*, мы не должны перекомпилировать его при каждом исполь-зовании
+
 ### 2.  Чем отличаются программные сущности, названные с большой буквы? То есть, чем *Average* отличается от *average*?
+
+> Любая сущность языка Go, которая начинается с заглавной буквы, означает, что другие пакеты и программы могут использовать эту сущность. Если бы мы назвали нашу функцию `average`, а не `Average`, то наша главная программа не смогла бы обратиться к ней.
 
 ### 3.  Что такое псевдоним пакета и как его сделать?
 
+> Мы используем только краткое имя `math` когда мы обращаемся к функциям в нашем пакете. Если же мы хотим использовать оба пакета, то мы можем использовать псевдоним:
+
+```Go
+import m "golang-book/chapter11/math"
+
+func main() {
+    xs := []float64{1,2,3,4}
+    avg := m.Average(xs)
+    fmt.Println(avg)
+}
+```
+
+> В этом коде m — псевдоним.
+
 ### 4.  Мы скопировали функцию *Average* из главы 7 в наш новый пакет. Создайте *Min* и *Max* функции для нахождения наименьших и наибольших значений в срезах дробных чисел типа *float64*.
 
+```Go
+package math
+
+// Найти среднее в массиве чисел.
+func Average(xs []float64) float64 {
+    total := float64(0)
+    for _, x := range xs {
+        total += x
+    }
+    return total / float64(len(xs))
+}
+
+// Найти минимальное в массиве чисел.
+func Min(xs []float64) (float64, bool) {
+    if len(xs) == 0 {
+        return 0.0, false
+    }
+    total := xs[0]
+    for _, x := range xs {
+        if total > x {
+            total = x
+        }
+    }
+    return total, true
+}
+
+// Найти максимальное в массиве чисел.
+func Max(xs []float64) (float64, bool) {
+    if len(xs) == 0 {
+        return 0.0, false
+    }
+    total := xs[0]
+    for _, x := range xs {
+        if total < x {
+            total = x
+        }
+    }
+    return total, true
+}
+```
+
+```Go
+package main
+
+import (
+    "fmt"
+    "golang-book/chapter11/math"
+)
+
+func main() {
+    xs := []float64{6, 10, 2, 7}
+    avg := math.Average(xs)
+    fmt.Println(avg)
+    avg, _ = math.Min(xs)
+    fmt.Println(avg)
+    avg, _ = math.Max(xs)
+    fmt.Println(avg)
+}
+```
+
 ### 5.  Напишите документацию к функциям *Min* и *Max* из предыдущей задачи.
+
+```
+PS C:\Program Files\Go\src\golang-book\chapter11> go doc ./math
+```
+
+> func Average(xs []float64) float64  
+func Max(xs []float64) (float64, bool)  
+func Min(xs []float64) (float64, bool)  
+
+```
+PS C:\Program Files\Go\src\golang-book\chapter11> go doc ./math Min
+```
+
+> package math // import "golang-book/chapter11/math"  
+func Min(xs []float64) (float64, bool)  
+Найти минимальное в массиве чисел.
+
+```
+PS C:\Program Files\Go\src\golang-book\chapter11> go doc ./math Max
+```
+
+> package math // import "golang-book/chapter11/math"  
+func Max(xs []float64) (float64, bool)  
+Найти максимальное в массиве чисел.
 
 ## Тестирование
 
