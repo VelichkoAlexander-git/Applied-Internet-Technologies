@@ -745,4 +745,91 @@ func Max(xs []float64) (float64, bool)
 
 ### 1.  Написать хороший набор тестов не всегда легко, но даже сам процесс их написания, зачастую, может выявить много проблем для первой реализации функции. Например, что произойдет с нашей функцией *Average*, если ей передать пустой список (*[]float64{}*)? Как нужно изменить функцию, чтобы она возвращала *0* в таких случаях?
 
+```
+PS C:\Program Files\Go\src\golang-book\chapter11\math> go test
+```
+> --- FAIL: TestAverage (0.00s)  
+    math_test.go:9: Expected 1.5, got  NaN  
+FAIL  
+exit status 1  
+FAIL    golang-book/chapter11/math      0.366s  
+
+```Go
+func Average(xs []float64) float64 {
+    if len(xs) == 0 {
+        return 0.0
+    }
+    total := float64(0)
+    for _, x := range xs {
+        total += x
+    }
+    return total / float64(len(xs))
+}
+```
+
 ### 2.  Напишите серию тестов для функций *Min* и *Max* из предыдущей главы.
+
+```Go
+package math
+
+import "testing"
+
+type testpair struct {
+	values  []float64
+	min     float64
+	max     float64
+	average float64
+}
+
+var tests = []testpair{
+	{[]float64{6, 10, 2, 7}, 2.0, 10.0, 6.25},
+	{[]float64{-8, 1, 8, -2, 4, -9}, -9.0, 8.0, -1.0},
+	{[]float64{-1, 1}, -1.0, 1.0, 0.0},
+	{[]float64{}, 0.0, 0.0, 0.0},
+}
+
+func TestAverage(t *testing.T) {
+	for _, pair := range tests {
+		v := Average(pair.values)
+		if v != pair.average {
+			t.Error(
+				"For", pair.values,
+				"expected", pair.average,
+				"got", v,
+			)
+		}
+	}
+}
+
+func TestMin(t *testing.T) {
+	for _, pair := range tests {
+		v, ok := Min(pair.values)
+		if !ok {
+			t.Error("Len array 0")
+		}
+		if v != pair.min {
+			t.Error(
+				"For", pair.values,
+				"expected", pair.min,
+				"got", v,
+			)
+		}
+	}
+}
+
+func TestMax(t *testing.T) {
+	for _, pair := range tests {
+		v, ok := Max(pair.values)
+		if !ok {
+			t.Error("Len array 0")
+		}
+		if v != pair.max {
+			t.Error(
+				"For", pair.values,
+				"expected", pair.max,
+				"got", v,
+			)
+		}
+	}
+}
+```
